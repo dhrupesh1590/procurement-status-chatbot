@@ -1,4 +1,4 @@
-FROM docker-hub.common.repositories.cloud.sap/python:3.13
+FROM python:3.13-slim
 
 ARG ARTIFACTORY_USER
 ARG ARTIFACTORY_TOKEN
