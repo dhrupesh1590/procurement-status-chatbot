@@ -1,10 +1,11 @@
 """Procurement Status Agent - Core agent logic with LangGraph."""
 import logging
+import os
 from dataclasses import dataclass
 from typing import AsyncGenerator, Literal
 
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_litellm import ChatLiteLLM
+from langchain_openai import ChatOpenAI
 from langgraph.graph import START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode
 
@@ -53,7 +54,16 @@ class ProcurementStatusAgent:
     SUPPORTED_CONTENT_TYPES = ["text", "text/plain"]
 
     def __init__(self):
-        self.llm = ChatLiteLLM(model="sap/anthropic--claude-4.5-sonnet")
+        # Use OpenAI-compatible endpoint - can be configured via environment
+        api_key = os.getenv("OPENAI_API_KEY", "dummy-key-for-demo")
+        base_url = os.getenv("OPENAI_BASE_URL", None)
+        
+        self.llm = ChatOpenAI(
+            model=os.getenv("MODEL_NAME", "gpt-4o"),
+            api_key=api_key,
+            base_url=base_url,
+            temperature=0.7
+        )
         
         # Define all procurement tools
         self.tools = [
