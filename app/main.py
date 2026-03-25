@@ -1,10 +1,3 @@
-# CRITICAL: Initialize telemetry BEFORE importing AI frameworks (LangChain, LiteLLM, etc.)
-from application_foundation.aicore import set_aicore_config
-from application_foundation.common.telemetry import auto_instrument
-
-set_aicore_config()
-auto_instrument()  # Must be called before importing LangChain/LiteLLM
-
 # Now safe to import AI frameworks and other dependencies
 import logging
 import os
