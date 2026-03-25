@@ -1,15 +1,57 @@
-name: App Foundation CD deploy to CONHOS
+name: Build and Deploy Agent
 on:
   workflow_dispatch:
-  pull_request:
   push:
     branches:
-    - "main"
- 
+      - "main"
+
 jobs:
-  deploy-conhos:
-    uses: application-foundation/ci-cd-workflow/.github/workflows/deploy-conhos.yml@main
-    secrets: inherit
+  build-and-deploy:
+    runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
+      packages: write
       id-token: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: docker-hub.common.repositories.cloud.sap
+          username: ${{ secrets.ARTIFACTORY_USER }}
+          password: ${{ secrets.ARTIFACTORY_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        run: |
+          echo "image_name=procurement-status-chatbot" >> $GITHUB_OUTPUT
+          echo "image_tag=latest" >> $GITHUB_OUTPUT
+          echo "registry=docker-hub.common.repositories.cloud.sap" >> $GITHUB_OUTPUT
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.registry }}/${{ steps.meta.outputs.image_name }}:${{ steps.meta.outputs.image_tag }}
+          build-args: |
+            ARTIFACTORY_USER=${{ secrets.ARTIFACTORY_USER }}
+            ARTIFACTORY_TOKEN=${{ secrets.ARTIFACTORY_TOKEN }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Deployment Info
+        run: |
+          echo "✅ Docker image built and pushed successfully!"
+          echo "Image: ${{ steps.meta.outputs.registry }}/${{ steps.meta.outputs.image_name }}:${{ steps.meta.outputs.image_tag }}"
+          echo ""
+          echo "📋 Next steps:"
+          echo "1. The container image is now available in the registry"
+          echo "2. Deploy using App Foundation CLI or portal"
+          echo "3. Apply the app.yaml configuration to your cluster"
