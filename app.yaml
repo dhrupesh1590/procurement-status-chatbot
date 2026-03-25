@@ -1,0 +1,24 @@
+apiVersion: workload.appfnd.sap/v1
+kind: Agent
+metadata:
+  name: procurement-status-chatbot
+  namespace: procurement-status-chatbot
+spec:
+  container:
+    buildPath: .
+    port: 5000
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "100m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+  service:
+    apiAuth:
+      path: /*
+      type: jwt
+  models:
+  - executableId: aws-bedrock
+    name: anthropic--claude-4.5-sonnet
+    version: latest

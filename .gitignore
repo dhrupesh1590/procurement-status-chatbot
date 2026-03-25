@@ -1,0 +1,14 @@
+.env
+.env.local
+.idea/
+app/__pycache__/
+app/.env
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.DS_Store
+tests/__pycache__/
+.pytest_cache/
+lowcode/__pycache__/
